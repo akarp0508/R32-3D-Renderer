@@ -1,0 +1,25 @@
+#org $1000
+#varspace $2000
+
+; gpu constants
+.const GPU_FLAGS $20000001
+
+.const GPU_PAGE $10C00
+.const GPU_PAGE_SIZE $FA00
+
+.var PAGE_INDEX 1
+.var FRAME_COUNTER 1
+.var RENDERABLE_TRIANGLES_COUNT 1
+.var TRIANGLE_POINTS_COUNT 1
+.var TRIANGLE_POINTS_OFFSET 2
+.var KEY_MAKECODE 2
+.var PROJECTED_VERTICES 256
+.var PROJECTED_TRIANGLES 256 ; each triangle 0B - addr of P1, 1B-addr of P2, 2B-addr of P3, 3B - color
+.var TRIANGLE_DISTANCE_FROM_CAMERA 256
+.var TEMP_VARS 512
+
+#include "src/init.asm"
+#include "src/main_loop.asm"
+#include "src/triangle_drawer.asm"
+#include "src/int_handlers.asm"
+#include "src/data.asm"
