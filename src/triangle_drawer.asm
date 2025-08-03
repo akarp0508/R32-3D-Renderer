@@ -138,6 +138,6 @@ bresenham_e2dy_if_skip:
 bresenham_e2dx_if_skip:
     jmp [r0,'bresenham_main_loop']
 bresenham_main_loop_finished:
-    sub r7 -20
+    sub r7 20
     wsp r7
     ret
