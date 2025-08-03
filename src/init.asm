@@ -7,7 +7,7 @@ mov r1 'color_palette'
 mov r2 $20000020
 load_palette:
 cpw r2+ r1+
-cmp r2 $20000800
+cmp r2 $20000220
 bne [r0,'load_palette']
 
 ; set GPU mode - 320x200 - 8b color pallette
@@ -23,7 +23,7 @@ add r1 GPU_PAGE_SIZE
 stw r1 [r0,$20000008]
 
 ; enable GPU rendering
-; enable V-blank & H-blank interrupts
+; enable V-blank interrupts
 mov r1 %11
 stb r1 [r0,$20000001]
 

@@ -45,18 +45,16 @@ follow_the_line: ; this uses bresenham's algorithm to follow the line of two giv
     mov r4 r3
     and r3 $00FF
     lsr r4 16
-    ; TODO: possibly here it would be best to make x offset to start from 0
-    
     ; dx = abs(x1 - x0)
     mov r6 r3 ; r6 = x1
     sub r6 r1 ; r6 = x1 - x2
-    bgr [r0,'bresenham_dx_neg_skip'] ; skip if r6 is positive
+    bps [r0,'bresenham_dx_neg_skip'] ; skip if r6 is positive
     neg r6
 bresenham_dx_neg_skip:
     ; dy = -abs(y1 - y0)
     mov r7 r4 ; r7 = y1
     sub r7 r2 ; r7 = y1 - y2
-    bls [r0,'bresenham_dy_neg_skip'] ; skip if r7 is negative
+    bng [r0,'bresenham_dy_neg_skip'] ; skip if r7 is negative
     neg r7
 bresenham_dy_neg_skip:
     ; let's store dx in the stack
