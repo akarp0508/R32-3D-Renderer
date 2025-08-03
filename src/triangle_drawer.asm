@@ -33,7 +33,6 @@ generate_wireframe: ; this does not draw anything - it just stores the y start a
     call [r0,'follow_the_line'] ; r3 r2
     pop r1
     pop r3
-    brk
     call [r0,'follow_the_line'] ; r2 r1
     ret
     
