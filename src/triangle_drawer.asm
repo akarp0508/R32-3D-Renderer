@@ -46,6 +46,8 @@ follow_the_line: ; this uses bresenham's algorithm to follow the line of two giv
     mov r4 r3
     and r3 $0000FFFF
     lsr r4 16
+    ; optimization trick - let's push r4 to the stack
+    psh r4
     ; dx = abs(x1 - x0)
     mov r6 r3 ; r6 = x1
     sub r6 r1 ; r6 = x1 - x2
@@ -78,24 +80,29 @@ bresenham_sx_neg_skip:
     neg r5 ; if its not make r5 = -1
 bresenham_sy_neg_skip:
     psh r5
-    ; at this point we should have dx, sx, dy, sy in stack
-    ; and we still should have x0, y0, x1, y1 in r1-r4
+    ; at this point we should have y1, dx, sx, dy, sy in stack
+    ; and we still should have x0, y0, x1 in r1-r3
+    ; and temporary y1 should be in r4
     ; now lets calculate err
     ; err = dx + dy
     mov r5 r6
     add r5 r7 ; r5 = err = dx + dy
+    mov r7 0
+    adsp r7
 bresenham_main_loop:
     ; TODO store the pixel values
     ; TEMP drawing the points on screen
-    mov r7 r2
-    mltl r7 320
-    add r7 r1
+    mov r4 r2
+    mltl r4 320
+    add r4 r1
     mov r6 15
-    stb r6 [r7,GPU_PAGE]
+    stb r6 [r4,GPU_PAGE]
     ; if x0 == x1 and y0 == y1:
     ;   break;
     cmp r1 r3 ; continue if x0 != x1
     bne [r0,'bresenham_main_loop_continue']
+    ; for this check we need r4 = y1 so we need to get this value from stack
+    ldw r4 [r7,-20]
     cmp r2 r4 ; continue if y0 != y1
     bne [r0,'bresenham_main_loop_continue']
     ; break if x0 == x1 and y0 == y1
@@ -106,40 +113,31 @@ bresenham_main_loop_continue:
     lsl r6 1 ; r6 = e2 = err * 2
     ; if e2 > dy:
     ; to check this condition first we need to get dy
-    mov r7 -8
-    adsp r7
-    ldw r7 [r7,0] ; r7 = dy
+    ldw r4 [r7,-8] ; r4 = dy
     ; now lets do the check
-    cmp r6 r7
+    cmp r6 r4
     ble [r0,'bresenham_e2dy_if_skip'] ; jmp if false
     ; err += dy
-    ; since r5 = err and r7 = dy
-    add r5 r7
+    ; since r5 = err and r4 = dy
+    add r5 r4
     ; x0 += sx
-    mov r7 -12
-    adsp r7
-    ldw r7 [r7,0]
-    add r1 r7
+    ldw r4 [r7,-12]
+    add r1 r4
 bresenham_e2dy_if_skip:
     ; if e2 < dx:
     ; to check this condition first we need to get dx
-    mov r7 -16
-    adsp r7
-    ldw r7 [r7,0] ; r7 = dx
+    ldw r4 [r7,-16] ; r4 = dx
     ; now lets do the check
-    cmp r6 r7
+    cmp r6 r4
     bge [r0,'bresenham_e2dx_if_skip'] ; jmp if false
     ; err += dx
-    ; since r5 = err and r7 = dy
-    add r5 r7
-    mov r7 -4
-    adsp r7
-    ldw r7 [r7,0]
-    add r2 r7
+    ; since r5 = err and r4 = dy
+    add r5 r4
+    ldw r4 [r7,-4]
+    add r2 r4
 bresenham_e2dx_if_skip:
     jmp [r0,'bresenham_main_loop']
 bresenham_main_loop_finished:
-    mov r7 -16
-    adsp r7
+    sub r7 -20
     wsp r7
     ret
