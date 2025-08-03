@@ -13,9 +13,9 @@
 .var TRIANGLE_POINTS_COUNT 1
 .var TRIANGLE_POINTS_OFFSET 2
 .var KEY_MAKECODE 2
-.var PROJECTED_VERTICES 256
-.var PROJECTED_TRIANGLES 256 ; each triangle 0B - addr of P1, 1B-addr of P2, 2B-addr of P3, 3B - color
-.var TRIANGLE_DISTANCE_FROM_CAMERA 256
+.var PROJECTED_VERTICES 1024
+.var PROJECTED_TRIANGLES 1024 ; each triangle 0B - addr of P1, 1B-addr of P2, 2B-addr of P3, 3B - color
+.var TRIANGLE_DISTANCE_FROM_CAMERA 1024
 .var TEMP_VARS 512
 
 #include "src/init.asm"

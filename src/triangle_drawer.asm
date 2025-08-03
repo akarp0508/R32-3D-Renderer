@@ -12,38 +12,40 @@ generate_wireframe: ; this does not draw anything - it just stores the y start a
     ; first lets get all the points values
     mov r2 r1
     mov r3 r1
-    and r1 $000F
-    and r2 $00F0
-    and r3 $0F00
-    lsr r2 8
-    lsr r3 16
+    and r1 $000000FF
+    and r2 $0000FF00
+    and r3 $00FF0000
+    lsl r1 2 ; *4
+    lsr r2 6 ; shift right by 8 and *4
+    lsr r3 14; shift right by 16 and *4
     ldw r1 [r1,PROJECTED_VERTICES]
     ldw r2 [r2,PROJECTED_VERTICES]
     ldw r3 [r3,PROJECTED_VERTICES]
-    ; at this point all the triangles should be in R1 R2 and R3
+    ; at this point all the points should be in R1 R2 and R3
     ; now we need to run bresenham's algorithm on all points combinations and store the results in an array
     psh r1
     psh r2
     psh r2
     psh r3
-    call [r0,'follow_the_line']
+    call [r0,'follow_the_line'] ; r1 r3
     pop r1
     pop r3
-    call [r0,'follow_the_line']
+    call [r0,'follow_the_line'] ; r3 r2
     pop r1
     pop r3
-    call [r0,'follow_the_line']
+    brk
+    call [r0,'follow_the_line'] ; r2 r1
     ret
     
 follow_the_line: ; this uses bresenham's algorithm to follow the line of two givem points on r1 and r2
     ; the max and min y value gets saved on x-indexed 
     ; make r1 = x0 and r2 = y0
     mov r2 r1
-    and r1 $00FF
+    and r1 $0000FFFF
     lsr r2 16
     ; make r3 = x1 and r4 = y1
     mov r4 r3
-    and r3 $00FF
+    and r3 $0000FFFF
     lsr r4 16
     ; dx = abs(x1 - x0)
     mov r6 r3 ; r6 = x1
@@ -64,7 +66,7 @@ bresenham_dy_neg_skip:
     mov r5 1
     cmp r1 r3
     bls [r0,'bresenham_sx_neg_skip'] ; skip if x0<x1
-    neg r5 ; if its not make r6 = -1
+    neg r5 ; if its not make r5 = -1
 bresenham_sx_neg_skip:
     psh r5 ; push it for future reference
     ; let's store -dy in the stack
@@ -74,7 +76,7 @@ bresenham_sx_neg_skip:
     mov r5 1
     cmp r2 r4
     bls [r0,'bresenham_sy_neg_skip'] ; skip if y0<y1
-    neg r5 ; if its not make r6 = -1
+    neg r5 ; if its not make r5 = -1
 bresenham_sy_neg_skip:
     psh r5
     ; at this point we should have dx, sx, dy, sy in stack
