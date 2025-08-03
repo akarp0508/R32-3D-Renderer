@@ -1,7 +1,4 @@
 IRQ_1_handler:
-; set GPU mode to text on V-blank
-; set GPU page to text page
-; increment frame counter
 psh r1
 ldbu r1 [r0,FRAME_COUNTER]
 inc r1
