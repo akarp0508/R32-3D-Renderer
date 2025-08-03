@@ -116,7 +116,7 @@ bresenham_main_loop_continue:
     ; since r5 = err and r7 = dy
     add r5 r7
     ; x0 += sx
-    mov r7 -4
+    mov r7 -12
     adsp r7
     ldw r7 [r7,0]
     add r1 r7
@@ -132,7 +132,7 @@ bresenham_e2dy_if_skip:
     ; err += dx
     ; since r5 = err and r7 = dy
     add r5 r7
-    mov r7 -12
+    mov r7 -4
     adsp r7
     ldw r7 [r7,0]
     add r2 r7
