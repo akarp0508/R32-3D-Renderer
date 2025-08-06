@@ -7,7 +7,7 @@ draw_triangle:
 
 
 
-generate_wireframe: ; this does not draw anything - it just stores the y start and stop values in x indexed array
+calc_min_max_y_of_every_x_in_triangle: ; this does not draw anything - it just stores the y start and stop values in x indexed array
     ; r1 should hold the triangle values
     ; first lets get all the points values
     mov r2 r1
@@ -27,16 +27,24 @@ generate_wireframe: ; this does not draw anything - it just stores the y start a
     psh r2
     psh r2
     psh r3
-    call [r0,'follow_the_line'] ; r1 r3
+    call [r0,'bresenham'] ; r1 r3
     pop r1
     pop r3
-    call [r0,'follow_the_line'] ; r3 r2
+    call [r0,'bresenham'] ; r3 r2
     pop r1
     pop r3
-    call [r0,'follow_the_line'] ; r2 r1
+    call [r0,'bresenham'] ; r2 r1
+    ret
+
+store_x_min_max_values:
+    mov r4 r2
+    mltl r4 320
+    add r4 r1
+    mov r6 15
+    stb r6 [r4,GPU_PAGE]
     ret
     
-follow_the_line: ; this uses bresenham's algorithm to follow the line of two givem points on r1 and r2
+bresenham: ; this uses bresenham's algorithm to follow the line of two givem points on r1 and r2
     ; the max and min y value gets saved on x-indexed 
     ; make r1 = x0 and r2 = y0
     mov r2 r1
@@ -90,13 +98,8 @@ bresenham_sy_neg_skip:
     mov r7 0
     adsp r7
 bresenham_main_loop:
-    ; TODO store the pixel values
-    ; TEMP drawing the points on screen
-    mov r4 r2
-    mltl r4 320
-    add r4 r1
-    mov r6 15
-    stb r6 [r4,GPU_PAGE]
+    ; use the x and y values of current point
+    call [r0,'store_x_min_max_values']
     ; if x0 == x1 and y0 == y1:
     ;   break;
     cmp r1 r3 ; continue if x0 != x1

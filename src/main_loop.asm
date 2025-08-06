@@ -12,7 +12,7 @@ main_loop:
     add r4 4
     stw r3 [r4,PROJECTED_VERTICES]
     mov r1 $00000102
-    call [r0,'generate_wireframe']
+    call [r0,'calc_min_max_y_of_every_x_in_triangle']
     jmp [r0,'main_loop']
 wait_for_gpu:
     ldbu r2 [r0,GPU_FLAGS]
