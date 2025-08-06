@@ -4,23 +4,66 @@ draw_all_triangles:
 draw_triangle:
     ; given data about projected points and color draw a triangle -
     ; triangles are coded this way 0B-P1 1B-P2 2B-P3 3B-Color
-
-
-
-calc_min_max_y_of_every_x_in_triangle: ; this does not draw anything - it just stores the y start and stop values in x indexed array
     ; r1 should hold the triangle values
     ; first lets get all the points values
     mov r2 r1
     mov r3 r1
+    mov r4 r1
     and r1 $000000FF
     and r2 $0000FF00
     and r3 $00FF0000
     lsl r1 2 ; *4
     lsr r2 6 ; shift right by 8 and *4
     lsr r3 14; shift right by 16 and *4
+    lsr r4 24; shift right by 24
+    psh r4 ; push the color value since it will be needed for filling the triangle
     ldw r1 [r1,PROJECTED_VERTICES]
     ldw r2 [r2,PROJECTED_VERTICES]
     ldw r3 [r3,PROJECTED_VERTICES]
+    call [r0,'calc_min_max_x_of_current_triangle']
+    call [r0,'calc_min_max_y_of_every_x_in_triangle']
+    pop r4 ; pop the color with which triangle should be filled
+    call [r0,'fill_triangle']
+    ret
+
+calc_min_max_x_of_current_triangle:
+    mov r5 319 ; let's assume border condition - min x = 319
+    mov r6 0 ; let's assume the other border condition - max x = 0
+    mov r4 r1
+    call [r0,'compare_current_x']
+    mov r4 r2
+    call [r0,'compare_current_x']
+    mov r4 r3
+    call [r0,'compare_current_x']
+    ; make the values be contained inside 0-319 range
+    cmp r5 0
+    bge [r0,'min_x_override_skip']
+    mov r5 0
+min_x_override_skip:
+    sth r5 [r0,TRIANGLE_X_MIN]
+    cmp r6 319
+    ble [r0,'max_x_override_skip']
+    mov r6 319
+max_x_override_skip:
+    sth r6 [r0,TRIANGLE_X_MAX]
+    ret
+
+compare_current_x:
+    and r4 $0000FFFF
+    cmp r4 r5
+    bge [r0,'compare_current_x_skip_min'] ; if r4 < r5 do:
+    mov r5 r4 ; store r4 as new x min
+compare_current_x_skip_min:
+    cmp r4 r6
+    ble [r0,'compare_current_x_skip_max'] ; if r4 > r6 do:
+    mov r6 r4 ; store r4 as new x min
+compare_current_x_skip_max:
+    ret
+
+fill_triangle:
+    ret
+
+calc_min_max_y_of_every_x_in_triangle: ; this does not draw anything - it just stores the y start and stop values in x indexed array
     ; at this point all the points should be in R1 R2 and R3
     ; now we need to run bresenham's algorithm on all points combinations and store the results in an array
     psh r1
@@ -37,6 +80,9 @@ calc_min_max_y_of_every_x_in_triangle: ; this does not draw anything - it just s
     ret
 
 store_x_min_max_values:
+    ; we have x in r1 and y in r2
+    ; we can use r4 as its overriden in the loop, 
+    ; but for any other register we need to stash its value
     mov r4 r2
     mltl r4 320
     add r4 r1
